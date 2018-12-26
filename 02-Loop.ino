@@ -177,16 +177,10 @@ void myGenieEventHandler(void) {
 	}
 }
 
-void CheckSound() {
-
-}
-
 void CheckBilges() {
 
 	static long waitPeriod = millis();
 	if (millis() >= waitPeriod) {
-
-
 
 		bilgesStatus1 = digitalRead(bilgesPin1);
 		bilgesStatus2 = digitalRead(bilgesPin2);
@@ -196,8 +190,9 @@ void CheckBilges() {
 		if (bilgesStatus1 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 1);
 					activity = 1;
 				}
@@ -208,8 +203,9 @@ void CheckBilges() {
 		else if (bilgesStatus2 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 1);
 					activity = 1;
 				}
@@ -219,14 +215,16 @@ void CheckBilges() {
 		else if (bilgesStatus3 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 1);
 					activity = 1;
 				}
 			}
 		}
 		else {
+			AlarmSound = false;
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 0);
@@ -283,6 +281,7 @@ uint32_t average(uint32_t input, int variable) { //variable: 1 for Speed, 2 for 
 	}
 	return AVG;
 }
+
 void CheckScreensaver() {
 	static long waitPeriod = millis();
 	if (millis() >= waitPeriod) {
@@ -343,4 +342,9 @@ void CheckScreensaver() {
 		}
 		waitPeriod = millis() + 100; // rerun this code in another 100 ms time.
 	}
+}
+
+
+void MakeNoise() {
+	genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 }

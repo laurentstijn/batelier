@@ -38,6 +38,7 @@ int bilgesStatus2;   // Bilges status = read pin D2
 int bilgesStatus3;   // Bilges status = read pin D2
 int activity;
 int Timezone = 2;
+boolean AlarmSound = false;
 
 //Globals screensaver
 boolean  newFormFlag = true;    // goes high when a new form has just been activated. Initially true.
@@ -83,4 +84,7 @@ void loop()
 	CheckBilges();
 	CheckPower();
 	CheckScreensaver();
+	if (AlarmSound = true) {
+		MakeNoise();
+	}
 }
