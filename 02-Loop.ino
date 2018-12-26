@@ -66,6 +66,11 @@ void CheckGPS() {
 void myGenieEventHandler(void) {
 	genieFrame Event;
 	genie.DequeueEvent(&Event);
+	
+	Serial.println("Event received:");
+	Serial.println(String(Event.reportObject.cmd));
+	Serial.println(String(Event.reportObject.object));
+	Serial.println(String(Event.reportObject.index));
 
 	//Relay stukje
 	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
@@ -124,6 +129,7 @@ void myGenieEventHandler(void) {
 		//Stop makenoise
 		if (Event.reportObject.object == GENIE_OBJ_USERBUTTON) {
 			if (Event.reportObject.index == 0) {
+				Serial.println("Sound button pressed");
 				AlarmSound = false;
 			}
 		}
@@ -183,6 +189,8 @@ void myGenieEventHandler(void) {
 	}
 }
 
+int InitialAlarm = false;
+
 void CheckBilges() {
 
 	static long waitPeriod = millis();
@@ -196,11 +204,14 @@ void CheckBilges() {
 		if (bilgesStatus1 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
-					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
 					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
@@ -209,11 +220,14 @@ void CheckBilges() {
 		else if (bilgesStatus2 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
-					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
 					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
@@ -221,16 +235,20 @@ void CheckBilges() {
 		else if (bilgesStatus3 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
-					AlarmSound = true;
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
 					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
 		else {
 			AlarmSound = false;
+			InitialAlarm = false;
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 0);
