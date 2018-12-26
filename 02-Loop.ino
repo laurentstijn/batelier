@@ -119,10 +119,16 @@ void myGenieEventHandler(void) {
 					digitalWrite(Relay_4, HIGH);  // set the Relay OFF
 				}
 			}
+
 		}
-	}
-	//ScreenSaver code
-	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
+		//Stop makenoise
+		if (Event.reportObject.object == GENIE_OBJ_USERBUTTON) {
+			if (Event.reportObject.index == 0) {
+				AlarmSound = false;
+			}
+		}
+
+		//ScreenSaver code
 		ssTimeStart = millis();
 		ssActiveFlag = false;
 		//if (Event.reportObject.object == GENIE_OBJ_4DBUTTON) {}
@@ -146,9 +152,9 @@ void myGenieEventHandler(void) {
 			else if (Event.reportObject.index == 6)  // If Form2
 				activeForm = 6;
 		}
-	}
-	//keyboard stukje
-	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
+
+		//keyboard stukje
+
 		if (Event.reportObject.object == GENIE_OBJ_KEYBOARD)
 		{
 			if (Event.reportObject.index == 0) // If keyboard0
@@ -344,7 +350,12 @@ void CheckScreensaver() {
 	}
 }
 
+long timeout = 20000;
+long timerstart = 0;
 
 void MakeNoise() {
-	genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+	if (millis() - timerstart >= timeout) {
+		timerstart = millis();
+		genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+	}
 }
