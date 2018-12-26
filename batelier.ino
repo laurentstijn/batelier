@@ -84,7 +84,7 @@ void loop()
 	CheckBilges();
 	CheckPower();
 	CheckScreensaver();
-	if (AlarmSound = true) {
+	if (AlarmSound == true) {
 		MakeNoise();
 	}
 }
