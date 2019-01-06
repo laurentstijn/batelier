@@ -11,7 +11,7 @@ void CheckGPS() {
 
 		if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
 			return;  // we can fail to parse a sentence in which case we should just wait for another
-		Serial.print("\nTime: ");
+		/*Serial.print("\nTime: ");
 		Serial.print(GPS.hour, DEC); Serial.print(':');
 		Serial.print(GPS.minute, DEC); Serial.print(':');
 		Serial.print(GPS.seconds, DEC); Serial.print('.');
@@ -21,9 +21,9 @@ void CheckGPS() {
 		Serial.print(GPS.month, DEC); Serial.print("/20");
 		Serial.println(GPS.year, DEC);
 		Serial.print("Fix: "); Serial.print((int)GPS.fix);
-		Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
+		Serial.print(" quality: "); Serial.println((int)GPS.fixquality);*/
 		if (GPS.fix) {
-			Serial.print("Location: ");
+			/*Serial.print("Location: ");
 			Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
 			Serial.print(", ");
 			Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
@@ -32,7 +32,7 @@ void CheckGPS() {
 			Serial.print("Speed (knots): "); Serial.println(GPS.speed);
 			Serial.print("Angle: "); Serial.println(GPS.angle);
 			Serial.print("Altitude: "); Serial.println(GPS.altitude);
-			Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
+			Serial.print("Satellites: "); Serial.println((int)GPS.satellites);*/
 		}
 	}
 
@@ -41,31 +41,42 @@ void CheckGPS() {
 
 	  //@Stijn, waarom moet je die elke loop updaten? Zeker dag, maand en zo hoeft niet elke loop
 	  //@David dit moet niet voor alles, moet enkel als er iets veranderd 
-	genie.WriteStr(0, GPS.day);
+	/*genie.WriteStr(0, GPS.day);
 	genie.WriteStr(1, GPS.month);
 	genie.WriteStr(2, GPS.year);
 
 	genie.WriteStr(3, (GPS.hour + n));
 	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x01, (GPS.hour + n));
 	genie.WriteStr(4, GPS.minute);
-	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x02, GPS.minute);
+	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x02, GPS.minute);*/
 
 	uint32_t speedAVG = average(GPS.speed, 1);
 	uint32_t angleAVG = average(GPS.angle, 2);
 	//genie.WriteStr(5, (GPS.speed*1,852));
-	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x04, (GPS.speed*1.852) * 10);
+	//genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x04, (GPS.speed*1.852) * 10);
+	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x04, round(speedAVG * 10) / 10);
+	Serial.print("Snelheid: ");
+	Serial.println(speedAVG * 10);
 	//genie.WriteStr(5, round(speedAVG*10)/10);
 	//genie.WriteStr(6, round(angleAVG*10)/10);
-	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x00, GPS.angle * 10); //*10 voor goede weergave op scherm
+	//genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x00, GPS.angle * 10); //*10 voor goede weergave op scherm
+	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x00, round(angleAVG*10));
+	Serial.print("Koers: ");
+	Serial.println(round(angleAVG));
 	//genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x00, round(angleAVG*10)/10);
-	genie.WriteObject(GENIE_OBJ_GAUGE, 0x00, (int)GPS.satellites);
-	genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x03, (int)GPS.satellites);
+	//genie.WriteObject(GENIE_OBJ_GAUGE, 0x00, (int)GPS.satellites);
+	//genie.WriteObject(GENIE_OBJ_LED_DIGITS, 0x03, (int)GPS.satellites);
 	delay(500);
 }
 
 void myGenieEventHandler(void) {
 	genieFrame Event;
 	genie.DequeueEvent(&Event);
+	
+	Serial.println("Event received:");
+	Serial.println(String(Event.reportObject.cmd));
+	Serial.println(String(Event.reportObject.object));
+	Serial.println(String(Event.reportObject.index));
 
 	//Relay stukje
 	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
@@ -119,10 +130,17 @@ void myGenieEventHandler(void) {
 					digitalWrite(Relay_4, HIGH);  // set the Relay OFF
 				}
 			}
+
 		}
-	}
-	//ScreenSaver code
-	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
+		//Stop makenoise
+		if (Event.reportObject.object == GENIE_OBJ_USERBUTTON) {
+			if (Event.reportObject.index == 0) {
+				Serial.println("Sound button pressed");
+				AlarmSound = false;
+			}
+		}
+
+		//ScreenSaver code
 		ssTimeStart = millis();
 		ssActiveFlag = false;
 		//if (Event.reportObject.object == GENIE_OBJ_4DBUTTON) {}
@@ -146,9 +164,9 @@ void myGenieEventHandler(void) {
 			else if (Event.reportObject.index == 6)  // If Form2
 				activeForm = 6;
 		}
-	}
-	//keyboard stukje
-	if (Event.reportObject.cmd == GENIE_REPORT_EVENT) {
+
+		//keyboard stukje
+
 		if (Event.reportObject.object == GENIE_OBJ_KEYBOARD)
 		{
 			if (Event.reportObject.index == 0) // If keyboard0
@@ -177,16 +195,12 @@ void myGenieEventHandler(void) {
 	}
 }
 
-void CheckSound() {
-
-}
+int InitialAlarm = false;
 
 void CheckBilges() {
 
 	static long waitPeriod = millis();
 	if (millis() >= waitPeriod) {
-
-
 
 		bilgesStatus1 = digitalRead(bilgesPin1);
 		bilgesStatus2 = digitalRead(bilgesPin2);
@@ -196,10 +210,15 @@ void CheckBilges() {
 		if (bilgesStatus1 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					genie.WriteContrast(15);//nodig om hem uit screensaver te halen bij alarm
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
@@ -208,10 +227,15 @@ void CheckBilges() {
 		else if (bilgesStatus2 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					genie.WriteContrast(15);
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
@@ -219,14 +243,21 @@ void CheckBilges() {
 		else if (bilgesStatus3 == HIGH) {
 			if (activity == 0) {
 				if (millis() >= waitPeriod) {
+					genie.WriteContrast(15);
 					genie.WriteObject(GENIE_OBJ_FORM, 2, 0);
-					genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
+					//genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 					genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 1);
 					activity = 1;
+					if (InitialAlarm == false) {
+						InitialAlarm = true;
+						AlarmSound = true;
+					}
 				}
 			}
 		}
 		else {
+			AlarmSound = false;
+			InitialAlarm = false;
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x00, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x01, 0);
 			genie.WriteObject(GENIE_OBJ_USER_LED, 0x02, 0);
@@ -283,6 +314,7 @@ uint32_t average(uint32_t input, int variable) { //variable: 1 for Speed, 2 for 
 	}
 	return AVG;
 }
+
 void CheckScreensaver() {
 	static long waitPeriod = millis();
 	if (millis() >= waitPeriod) {
@@ -341,6 +373,16 @@ void CheckScreensaver() {
 			}
 			genie.WriteContrast(15);
 		}
-		waitPeriod = millis() + 100; // rerun this code in another 100 ms time.
+		//waitPeriod = millis() + 100; // rerun this code in another 100 ms time.
+	}
+}
+
+long timeout = 10000;
+long timerstart = 0;
+
+void MakeNoise() {
+	if (millis() - timerstart >= timeout) {
+		timerstart = millis();
+		genie.WriteObject(GENIE_OBJ_SOUND, 0, 0);
 	}
 }
