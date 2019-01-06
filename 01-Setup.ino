@@ -32,7 +32,7 @@ void useInterrupt(boolean v) {
 }
 
 void GPSStart() {
-	Serial.println("Adafruit GPS library basic test!");
+	//Serial.println("Adafruit GPS library basic test!");
 	GPS.begin(9600);
 	GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
 	useInterrupt(true);

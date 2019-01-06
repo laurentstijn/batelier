@@ -9,8 +9,8 @@ void CheckGPS() {
 		// so be very wary if using OUTPUT_ALLDATA and trytng to print out data
 		//Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
 
-		if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
-			return;  // we can fail to parse a sentence in which case we should just wait for another
+		if (!GPS.parse(GPS.lastNMEA()))		// this also sets the newNMEAreceived() flag to false
+			return;							// we can fail to parse a sentence in which case we should just wait for another
 		/*Serial.print("\nTime: ");
 		Serial.print(GPS.hour, DEC); Serial.print(':');
 		Serial.print(GPS.minute, DEC); Serial.print(':');
@@ -329,7 +329,7 @@ void CheckScreensaver() {
 
 		if (ssTimeElapsed > ssTimeout) {
 			if (ssActiveFlag == false) {
-				genie.WriteContrast(0);  //set the brightness to 0
+				genie.WriteContrast(0);							//set the brightness to 0
 				genie.WriteObject(GENIE_OBJ_FORM, 0x05, 0x00);  // make the display navigate to form 5                      
 				ssActiveFlag = true;
 			}
@@ -377,6 +377,7 @@ void CheckScreensaver() {
 	}
 }
 
+//Timer voor alarm 
 long timeout = 10000;
 long timerstart = 0;
 
