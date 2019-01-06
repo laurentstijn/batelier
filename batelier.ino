@@ -14,7 +14,7 @@ Genie genie;
 
 //Pinnumbers
 //int sensorPin = A0;  // the wiper of the trimmer potentiometer is connected to pin A0
-int sensorPin1 = A1; // Pin voor optionele 2de voltmeter
+//int sensorPin1 = A1; // Pin voor optionele 2de voltmeter
 #define RESETLINE 4  // Using Arduino Adaptor Shield Version 2.0 @Stijn, is dat ook voor 't display?? @David idd voor de display
 #define Relay_1  22  // On Arduino Mega pin number to relay 1
 #define Relay_2  23  // On Arduino Mega pin number to relay 2
